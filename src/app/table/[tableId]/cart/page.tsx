@@ -44,7 +44,7 @@ const cartStorage = {
 
       const storageKey = `${STORAGE_KEY_PREFIX}${tableId}_cart`;
       const cartString = JSON.stringify(cart);
-      
+
       try {
         localStorage.setItem(storageKey, cartString);
         return true;
@@ -140,7 +140,7 @@ export default function TableCart() {
   }, [tableId, router]);
 
   const calculateTotal = (cartItems: CartItem[]) => {
-    const sum = cartItems.reduce((total, item) => 
+    const sum = cartItems.reduce((total, item) =>
       total + (item.price * item.quantity), 0
     );
     setTotal(sum);
@@ -175,10 +175,13 @@ export default function TableCart() {
     setIsLoading(true);
     const order = {
       tableId,
+      customerName: session?.user?.name || "Guest",
+      phoneNumber: "Not provided",
       userEmail: session?.user?.email || "",
       items: cart,
       total,
       orderTime: new Date().toISOString(),
+      source: "website"
     };
 
     try {
@@ -216,26 +219,31 @@ export default function TableCart() {
           className="max-w-4xl mx-auto"
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-8 mt-14">
             <Button
               color="blue-gray"
               variant="text"
               className="flex items-center gap-2"
               onClick={() => router.push(`/table/${tableId}`)}
-             
             >
               <FiArrowLeft className="h-4 w-4" />
               <span>Back to Menu</span>
             </Button>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-6">
               <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold">{tableId}</span>
               </div>
-              <Typography variant="h4" color="blue-gray" className="font-bold" >
+              <Typography variant="h4" color="blue-gray" className="font-bold">
                 Table {tableId}
               </Typography>
+              {session?.user?.name && (
+                <Typography variant="small" color="gray" className="italic">
+                  {session.user.name}
+                </Typography>
+              )}
             </div>
           </div>
+
 
           {/* Cart Items */}
           {cart.length > 0 ? (
@@ -253,13 +261,13 @@ export default function TableCart() {
                           {item.name}
                         </Typography>
                         <div className="flex items-center gap-3">
-                            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                              Qty: {item.quantity}
-                            </span>
-                            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
-                              ₹{item.price}
-                            </span>
-                          </div>
+                          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            Qty: {item.quantity}
+                          </span>
+                          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
+                            ₹{item.price}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <Typography variant="h6" color="blue-gray" className="font-bold" >
@@ -271,7 +279,7 @@ export default function TableCart() {
                             color="blue-gray"
                             size="sm"
                             onClick={() => updateQuantity(index, item.quantity - 1)}
-                            
+
                           >
                             <FiMinus className="h-4 w-4" />
                           </IconButton>
@@ -283,7 +291,7 @@ export default function TableCart() {
                             color="blue-gray"
                             size="sm"
                             onClick={() => updateQuantity(index, item.quantity + 1)}
-                           
+
                           >
                             <FiPlus className="h-4 w-4" />
                           </IconButton>
@@ -292,7 +300,7 @@ export default function TableCart() {
                             color="red"
                             size="sm"
                             onClick={() => removeItem(index)}
-                           
+
                           >
                             <FiTrash2 className="h-4 w-4" />
                           </IconButton>
@@ -321,7 +329,7 @@ export default function TableCart() {
                 color="blue"
                 onClick={() => router.push(`/table/${tableId}`)}
                 className="mt-4"
-              
+
               >
                 Browse Menu
               </Button>
@@ -350,7 +358,7 @@ export default function TableCart() {
                     className="w-full"
                     onClick={handlePlaceOrder}
                     disabled={isLoading}
-                   
+
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center">
