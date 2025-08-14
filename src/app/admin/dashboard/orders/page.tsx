@@ -170,15 +170,15 @@ export default function OrdersManagement() {
     .reduce((sum, o) => sum + o.total, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-4 sm:py-8 overflow-x-hidden">
+      <div className="container mx-auto px-2 sm:px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-4 shadow-lg">
               <FiShoppingBag className="h-8 w-8 text-white" />
             </div>
-            <Typography variant="h2" color="blue-gray" className="mb-2 font-bold" {...materialProps}>
+            <Typography variant="h2" color="blue-gray" className="mb-2 font-bold text-2xl sm:text-3xl" {...materialProps}>
               Orders Management
             </Typography>
             <Typography variant="lead" color="gray" className="max-w-2xl mx-auto" {...materialProps}>
@@ -187,7 +187,7 @@ export default function OrdersManagement() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
             <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform hover:scale-105 transition-transform duration-300" {...materialProps}>
               <CardBody className="text-center" {...materialProps}>
                 <FiShoppingBag className="h-8 w-8 mx-auto mb-3" />
@@ -238,8 +238,8 @@ export default function OrdersManagement() {
           </div>
 
           {/* Filters Section */}
-          <Card className="mb-8 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50" {...materialProps}>
-            <CardBody className="p-6" placeholder="" {...materialProps}>
+          <Card className="mb-6 sm:mb-8 shadow-lg border-0 bg-gradient-to-r from-white to-gray-50" {...materialProps}>
+            <CardBody className="p-4 sm:p-6" placeholder="" {...materialProps}>
               <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FiFilter className="h-5 w-5 text-blue-500" />
@@ -364,7 +364,7 @@ export default function OrdersManagement() {
               </CardBody>
             </Card>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {filteredOrders.map((order, index) => (
                 <Card
                   key={order._id}
@@ -375,25 +375,25 @@ export default function OrdersManagement() {
 
                   {...materialProps}
                 >
-                  <CardBody className="p-8" {...materialProps}>
-                    <div className="flex justify-between items-start mb-6">
+                  <CardBody className="p-4 sm:p-8" {...materialProps}>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4 sm:mb-6">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
                             <span className="text-white font-bold text-lg">#{order._id.slice(-4)}</span>
                           </div>
                           <div>
-                            <Typography variant="h5" color="blue-gray" className="font-bold" {...materialProps}>
+                            <Typography variant="h5" color="blue-gray" className="font-bold text-xl sm:text-2xl" {...materialProps}>
                               Order #{order._id.slice(-6)}
                             </Typography>
-                            <div className="flex items-center gap-4 mt-2">
-                              <div className="flex items-center gap-2 text-gray-600">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
+                              <div className="flex items-center gap-2 text-gray-600 text-sm">
                                 <FiClock className="h-4 w-4" />
-                                <Typography variant="small" className="font-medium" {...materialProps}>
+                                <Typography variant="small" className="font-medium whitespace-nowrap" {...materialProps}>
                                   {formatDate(order.orderTime)}
                                 </Typography>
                               </div>
-                              <div className="flex items-center gap-2 text-gray-600">
+                              <div className="flex items-center gap-2 text-gray-600 text-sm">
                                 <FiTable className="h-4 w-4" />
                                 <Typography variant="small" className="font-medium" {...materialProps}>
                                   Table {order.tableId}
@@ -406,14 +406,14 @@ export default function OrdersManagement() {
                       <Chip
                         value={order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         color={getStatusColor(order.status)}
-                        className="font-bold px-4 py-2"
+                        className="font-bold px-4 py-2 self-start sm:self-auto"
                         icon={getStatusIcon(order.status)}
                       />
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6 mb-6">
+                    <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mb-6">
                       {/* Customer Details */}
-                      <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-100">
+                      <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 sm:p-6 border border-gray-100">
                         <Typography variant="h6" color="blue-gray" className="mb-4 font-bold flex items-center gap-2" {...materialProps}>
                           <FiUser className="h-5 w-5" />
                           Customer Details
@@ -455,7 +455,7 @@ export default function OrdersManagement() {
                       </div>
 
                       {/* Order Items */}
-                      <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-100">
+                      <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 sm:p-6 border border-gray-100">
                         <Typography variant="h6" color="blue-gray" className="mb-4 font-bold flex items-center gap-2" {...materialProps}>
                           <FiShoppingBag className="h-5 w-5" />
                           Order Items

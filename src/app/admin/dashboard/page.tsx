@@ -132,63 +132,63 @@ export default function AdminDashboard() {
   };
 
   const fetchStats = async () => {
-  try {
-    const [statsRes, recentOrdersRes] = await Promise.all([
-      fetch('http://localhost:5001/api/admin/stats'),
-      fetch('http://localhost:5001/api/orders/recent'),
-    ]);
+    try {
+      const [statsRes, recentOrdersRes] = await Promise.all([
+        fetch('http://localhost:5001/api/admin/stats'),
+        fetch('http://localhost:5001/api/orders/recent'),
+      ]);
 
-    if (!statsRes.ok || !recentOrdersRes.ok) throw new Error('Failed to fetch data');
+      if (!statsRes.ok || !recentOrdersRes.ok) throw new Error('Failed to fetch data');
 
-    const statsData = await statsRes.json();
-    const recentData = await recentOrdersRes.json();
+      const statsData = await statsRes.json();
+      const recentData = await recentOrdersRes.json();
 
-    const recentOrders: RecentOrder[] = Array.isArray(recentData.orders)
-      ? (recentData.orders as RecentOrder[]).sort(
+      const recentOrders: RecentOrder[] = Array.isArray(recentData.orders)
+        ? (recentData.orders as RecentOrder[]).sort(
           (a: RecentOrder, b: RecentOrder) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         )
-      : [];
+        : [];
 
-    const itemCount: Record<string, { name: string; category: string; orders: number }> = {};
+      const itemCount: Record<string, { name: string; category: string; orders: number }> = {};
 
-    recentOrders.forEach((order: RecentOrder) => {
-      order.items.forEach((item: RecentOrderItem) => {
-        const category =
-          item.category ||
-          item.productCategory || // fallback if backend uses another name
-          'Uncategorized';
+      recentOrders.forEach((order: RecentOrder) => {
+        order.items.forEach((item: RecentOrderItem) => {
+          const category =
+            item.category ||
+            item.productCategory || // fallback if backend uses another name
+            'Uncategorized';
 
-        if (!itemCount[item.name]) {
-          itemCount[item.name] = {
-            name: item.name,
-            category,
-            orders: 0
-          };
-        }
-        itemCount[item.name].orders += item.quantity;
+          if (!itemCount[item.name]) {
+            itemCount[item.name] = {
+              name: item.name,
+              category,
+              orders: 0
+            };
+          }
+          itemCount[item.name].orders += item.quantity;
+        });
       });
-    });
 
-    const popularItems = Object.values(itemCount)
-      .sort((a, b) => b.orders - a.orders)
-      .slice(0, 5);
+      const popularItems = Object.values(itemCount)
+        .sort((a, b) => b.orders - a.orders)
+        .slice(0, 5);
 
-    setStats(prev => ({
-      ...prev,
-      ...statsData,
-      recentOrders,
-      popularItems
-    }));
+      setStats(prev => ({
+        ...prev,
+        ...statsData,
+        recentOrders,
+        popularItems
+      }));
 
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-  }
-};
-  
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   useEffect(() => {
     fetchStats();
     const interval = setInterval(fetchStats, 5 * 60 * 1000);
-  
+
     // ✅ Listen for real-time new orders
     socket.on('new-order', (order) => {
       setStats(prev => {
@@ -200,14 +200,14 @@ export default function AdminDashboard() {
         };
       });
     });
-    
-  
+
+
     return () => {
       clearInterval(interval);
       socket.off('new-order');
     };
   }, []);
-  
+
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
@@ -254,7 +254,7 @@ export default function AdminDashboard() {
                 </div>
               </M.CardBody>
             </M.Card>
-            
+
 
             <M.Card className="bg-gradient-to-br from-green-500 to-green-600 shadow-green-500/30" {...materialProps}>
               <M.CardBody className="p-3 sm:p-4" {...materialProps}>
@@ -300,7 +300,7 @@ export default function AdminDashboard() {
                 </div>
               </M.CardBody>
             </M.Card>
-            
+
 
             <M.Card className="bg-gradient-to-br from-purple-500 to-purple-600 shadow-purple-500/30" {...materialProps}>
               <M.CardBody className="p-3 sm:p-4" {...materialProps}>
@@ -326,86 +326,21 @@ export default function AdminDashboard() {
               </M.CardBody>
             </M.Card>
           </motion.div>
-          
+
 
           {/* Quick Actions */}
-          <motion.div
-            className="mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
-            variants={itemVariants}
-          >
-            <Link href="/admin/dashboard/menu">
-              <M.Card className="hover:shadow-lg transition-shadow h-full bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200" {...materialProps}>
-                <M.CardBody className="flex flex-col items-center text-center p-3 sm:p-4" {...materialProps}>
-                  <div className="p-2 sm:p-3 bg-blue-500 rounded-full mb-2 sm:mb-3 shadow-lg">
-                    <MenuIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                  </div>
-                  <M.Typography variant="h6" color="blue-gray" className="mb-1 text-sm sm:text-base font-bold" {...materialProps}>
-                    Menu
-                  </M.Typography>
-                  <M.Typography variant="small" color="gray" className="text-xs sm:text-sm" {...materialProps}>
-                    Manage Items
-                  </M.Typography>
-                </M.CardBody>
-              </M.Card>
-            </Link>
 
-            <Link href="/admin/dashboard/orders">
-              <M.Card className="hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-green-100 border border-green-200" {...materialProps}>
-                <M.CardBody className="flex flex-col items-center text-center p-3 sm:p-4" {...materialProps}>
-                  <div className="p-2 sm:p-3 bg-green-500 rounded-full mb-2 sm:mb-3 shadow-lg">
-                    <FiCoffee className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                  </div>
-                  <M.Typography variant="h6" color="blue-gray" className="mb-1 text-sm sm:text-base font-bold" {...materialProps}>
-                    Order Management
-                  </M.Typography>
-                  <M.Typography variant="small" color="gray" className="text-xs sm:text-sm" {...materialProps}>
-                    Monitor and manage table orders
-                  </M.Typography>
-                </M.CardBody>
-              </M.Card>
-            </Link>
 
-            <Link href="/admin/dashboard/analytics">
-              <M.Card className="hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200" {...materialProps}>
-                <M.CardBody className="flex flex-col items-center text-center p-3 sm:p-4" {...materialProps}>
-                  <div className="p-2 sm:p-3 bg-purple-500 rounded-full mb-2 sm:mb-3 shadow-lg">
-                    <FiPieChart className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                  </div>
-                  <M.Typography variant="h6" color="blue-gray" className="mb-1 text-sm sm:text-base font-bold" {...materialProps}>
-                    Analytics
-                  </M.Typography>
-                  <M.Typography variant="small" color="gray" className="text-xs sm:text-sm" {...materialProps}>
-                    View detailed business insights
-                  </M.Typography>
-                </M.CardBody>
-              </M.Card>
-            </Link>
 
-            <Link href="/admin/dashboard/settings">
-              <M.Card className="hover:shadow-lg transition-shadow bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200" {...materialProps}>
-                <M.CardBody className="flex flex-col items-center text-center p-3 sm:p-4" {...materialProps}>
-                  <div className="p-2 sm:p-3 bg-amber-500 rounded-full mb-2 sm:mb-3 shadow-lg">
-                    <FiSettings className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                  </div>
-                  <M.Typography variant="h6" color="blue-gray" className="mb-1 text-sm sm:text-base font-bold" {...materialProps}>
-                    Settings
-                  </M.Typography>
-                  <M.Typography variant="small" color="gray" className="text-xs sm:text-sm" {...materialProps}>
-                    Configure system preferences
-                  </M.Typography>
-                </M.CardBody>
-              </M.Card>
-            </Link>
-          </motion.div>
 
           {/* Management Section */}
           <motion.div
             className="mt-4 sm:mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3"
             variants={itemVariants}
           >
-            
-           {/* Recent Orders */}
-           <M.Card className="lg:col-span-2 overflow-hidden bg-white shadow-xl border border-gray-100" {...materialProps}>
+
+            {/* Recent Orders */}
+            <M.Card className="lg:col-span-2 overflow-hidden bg-white shadow-xl border border-gray-100" {...materialProps}>
               <M.CardBody className="p-3 sm:p-4" {...materialProps}>
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <M.Typography variant="h6" color="blue-gray" className="text-base sm:text-lg font-bold" {...materialProps}>
@@ -505,29 +440,29 @@ export default function AdminDashboard() {
                   Popular Items
                 </M.Typography>
                 <M.List>
-  {stats.popularItems?.map((item, index) => (
-    <M.ListItem
-      key={index}
-      className="mb-2 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100"
-    
-    >
-      <div className="flex w-full justify-between items-center flex-wrap gap-2">
-        <div>
-        <M.Typography variant="small" color="blue-gray" className="font-bold" {...materialProps}>
-  {item.name} ({item.category})
-</M.Typography>
-          <M.Typography
-            variant="small"
-            color="gray"
-           
-          >
-            {item.orders} {item.orders === 1 ? 'order' : 'orders'}
-          </M.Typography>
-        </div>
-      </div>
-    </M.ListItem>
-  ))}
-</M.List>
+                  {stats.popularItems?.map((item, index) => (
+                    <M.ListItem
+                      key={index}
+                      className="mb-2 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100"
+
+                    >
+                      <div className="flex w-full justify-between items-center flex-wrap gap-2">
+                        <div>
+                          <M.Typography variant="small" color="blue-gray" className="font-bold" {...materialProps}>
+                            {item.name} ({item.category})
+                          </M.Typography>
+                          <M.Typography
+                            variant="small"
+                            color="gray"
+
+                          >
+                            {item.orders} {item.orders === 1 ? 'order' : 'orders'}
+                          </M.Typography>
+                        </div>
+                      </div>
+                    </M.ListItem>
+                  ))}
+                </M.List>
 
               </M.CardBody>
             </M.Card>
