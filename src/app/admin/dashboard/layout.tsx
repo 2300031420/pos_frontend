@@ -4,17 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
-  Typography,
-  List,
-  ListItem,
-  ListItemPrefix,
-} from "@material-tailwind/react";
-import {
-  FiHome,
-  FiMenu,
-  FiUsers,
-  FiSettings,
-} from "react-icons/fi";
+  HomeIcon,
+  BookOpenIcon,
+  ClipboardDocumentListIcon,
+  UsersIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/solid";
 import Link from "next/link";
 
 export default function AdminDashboardLayout({
@@ -25,8 +20,9 @@ export default function AdminDashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
-  // Sidebar starts closed on mobile; remains visible on lg via CSS classes
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isProfileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -34,43 +30,13 @@ export default function AdminDashboardLayout({
     }
   }, [status, router]);
 
-  // Listen for global toggle events dispatched from pages' navbars
   useEffect(() => {
     const toggle = () => setSidebarOpen((prev) => !prev);
-    const open = () => setSidebarOpen(true);
-    const close = () => setSidebarOpen(false);
-
-    // Cast to EventListener to satisfy TS DOM typings
-    window.addEventListener("toggle-admin-sidebar", toggle as unknown as EventListener);
-    window.addEventListener("open-admin-sidebar", open as unknown as EventListener);
-    window.addEventListener("close-admin-sidebar", close as unknown as EventListener);
-
+    window.addEventListener("toggle-admin-sidebar", toggle as EventListener);
     return () => {
-      window.removeEventListener("toggle-admin-sidebar", toggle as unknown as EventListener);
-      window.removeEventListener("open-admin-sidebar", open as unknown as EventListener);
-      window.removeEventListener("close-admin-sidebar", close as unknown as EventListener);
+      window.removeEventListener("toggle-admin-sidebar", toggle as EventListener);
     };
   }, []);
-
-  const navItems = [
-    { label: "Dashboard", icon: FiHome, href: "/admin/dashboard" },
-    { label: "Menu", icon: FiMenu, href: "/admin/dashboard/menu" },
-    { label: "Order Management", icon: FiHome, href: "/admin/dashboard/orders", png: "/image/order.png" },
-    { label: "Users", icon: FiUsers, href: "/admin/dashboard/users" },
-    { label: "Settings", icon: FiSettings, href: "/admin/dashboard/settings" },
-  ];
-
-  // Relax Material Tailwind types for JSX usage
-  const M = {
-    Typography: Typography as any,
-    List: List as any,
-    ListItem: ListItem as any,
-    ListItemPrefix: ListItemPrefix as any,
-  };
-
-  const sectionSlug = (pathname?.split('/').filter(Boolean)[2] ?? 'dashboard');
-  const profileRef = useRef<HTMLDivElement | null>(null);
-  const [isProfileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
@@ -82,13 +48,19 @@ export default function AdminDashboardLayout({
     return () => document.removeEventListener('click', onClickOutside);
   }, [isProfileOpen]);
 
+  const navItems = [
+    { label: "Dashboard", icon: HomeIcon, href: "/admin/dashboard" },
+    { label: "Menu", icon: BookOpenIcon, href: "/admin/dashboard/menu" },
+    { label: "Order Management", icon: ClipboardDocumentListIcon, href: "/admin/dashboard/orders" },
+    { label: "Users", icon: UsersIcon, href: "/admin/dashboard/users" },
+    { label: "Settings", icon: Cog6ToothIcon, href: "/admin/dashboard/settings" },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Admin Top Navbar (visible on all admin pages) */}
       <nav className="fixed top-0 inset-x-0 z-[80] bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 h-16 flex items-center">
-          {/* Left cluster */}
-          <div className="flex items-center gap-2 flex-none">
+        <div className="w-full px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <button
               className="lg:hidden p-2 rounded hover:bg-blue-50"
               aria-label="Toggle sidebar"
@@ -101,24 +73,31 @@ export default function AdminDashboardLayout({
             <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent leading-none">
               Tastoria Cafe Admin
             </span>
-
-            {/* Removed section slug badge */}
           </div>
-          {/* Center cluster (desktop nav) */}
-          <div className="hidden lg:flex items-center gap-6 justify-center flex-1">
+
+          <div className="hidden lg:flex items-center gap-6">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm font-medium px-2 py-1 rounded hover:bg-gray-100 ${pathname === item.href ? 'text-blue-600' : 'text-gray-700'}`}
+                className={`relative group flex items-center gap-2 text-base px-2 py-2 transition-colors ${
+                  pathname === item.href
+                    ? 'font-bold text-blue-600'
+                    : 'font-medium text-gray-700 hover:text-blue-500'
+                }`}
               >
-                {item.label}
+                <item.icon className="h-4 w-4" />
+                <span>{item.label}</span>
+                <span
+                  className={`absolute -bottom-0 left-0 h-0.5 bg-blue-500 transition-all duration-300 group-hover:w-full ${
+                    pathname === item.href ? 'w-full' : 'w-0'
+                  }`}
+                ></span>
               </Link>
             ))}
           </div>
-          {/* Right cluster */}
-          <div className="flex items-center gap-2 flex-none ml-auto">
-            {/* Profile dropdown with click toggle */}
+
+          <div className="flex items-center gap-2">
             <div className="relative" ref={profileRef}>
               <button
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200"
@@ -127,7 +106,6 @@ export default function AdminDashboardLayout({
                 onClick={() => setProfileOpen((prev) => !prev)}
               >
                 {session?.user?.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={session.user.image} alt="profile" className="h-6 w-6 rounded-full object-cover" />
                 ) : (
                   <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-semibold">
@@ -161,7 +139,6 @@ export default function AdminDashboardLayout({
       </nav>
 
       <div className="pt-16">
-        {/* Mobile slide-in menu */}
         {isSidebarOpen && (
           <>
             <div
@@ -182,10 +159,15 @@ export default function AdminDashboardLayout({
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={`block px-3 py-2 rounded text-sm ${pathname === item.href ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                      className={`flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${
+                        pathname === item.href
+                          ? 'font-bold bg-blue-50 text-blue-600'
+                          : 'font-medium text-gray-700 hover:bg-gray-100'
+                      }`}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      {item.label}
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.label}</span>
                     </Link>
                   </li>
                 ))}
@@ -194,20 +176,19 @@ export default function AdminDashboardLayout({
           </>
         )}
 
-        {/* Main Content */}
-        <div className="overflow-auto p-4">
+        <main className="overflow-auto p-4">
           {status === "loading" ? (
-            <div className="flex justify-center items-center min-h-screen">
+            <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
           ) : status === "unauthenticated" ? (
-            <div className="flex justify-center items-center min-h-screen">
+            <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
               <p>Redirecting to login...</p>
             </div>
           ) : (
             children
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
